@@ -1,0 +1,59 @@
+<div class="container mt-5">
+  <h2 class="mb-4">Login Form</h2>
+  <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+    <div class="mb-4">
+      <p-floatlabel>
+        <input id="email" pInputText formControlName="email" />
+        <label for="email">email</label>
+      </p-floatlabel>
+      
+          <div
+            *ngIf="
+              loginForm.get('email')?.invalid && loginForm.get('email')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="loginForm.get('email')?.errors?.['required']"
+              >Email is Required</small
+            >
+            <small
+              class="text-danger"
+              *ngIf="loginForm.get('email')?.errors?.['email']"
+            >
+              Please enter a valid email address.
+            </small>
+          </div>
+    </div>
+    <div class="mb-4">
+      <p-floatlabel>
+        <p-password
+          id="password"
+          formControlName="password"
+          [toggleMask]="true"
+        />
+        <label for="password">Password</label>
+      </p-floatlabel>
+      
+        <div
+          *ngIf="
+            loginForm.get('password')?.invalid &&
+            loginForm.get('password')?.touched
+          "
+        >
+          <small
+            class="text-danger"
+            *ngIf="loginForm.get('password')?.errors?.['required']"
+            >Password is Required</small
+          >
+          <small
+            class="text-danger"
+            *ngIf="loginForm.get('password')?.errors?.['minlength']"
+          >
+            Password must be at least 4 characters long.
+          </small>
+        </div>
+    </div><i *ngIf="loading" class="pi pi-spin pi-spinner text-dark me-2"> </i>
+    <p-button label="Submit" type="Submit" [disabled]="loading || loginForm.invalid" /> 
+  </form>
+</div>

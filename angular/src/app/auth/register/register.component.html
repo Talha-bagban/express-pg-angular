@@ -1,0 +1,36 @@
+<div class="container mt-5">
+    <h2 class="mb-4">Register New User</h2>
+
+    <form [formGroup]="register" (ngSubmit)="onSubmit()">
+         <div class="mb-4">
+            <p-floatlabel>
+                <input id="firstname" pInputText formControlName="firstname" />
+                <label for="firstname">First Name</label>
+            </p-floatlabel>
+        </div>
+        <div class="mb-4">
+            <p-floatlabel>
+                <input id="lastname" pInputText formControlName="lastname" />
+                <label for="lastname">Last Name</label>
+            </p-floatlabel>
+        </div>
+         <div class="mb-4">
+            <p-floatlabel>
+                <input id="email" pInputText formControlName="email" />
+                <label for="email">email</label>
+            </p-floatlabel>
+        </div>
+         <div class="mb-4">
+            <p-floatlabel>
+                <p-password id="password" formControlName="password" [toggleMask]="true" />
+                <label for="password">Password</label>
+            </p-floatlabel>
+        </div>
+        <div class="mb-4">
+            <p-select formControlName="role" [options]="role" optionValue="name" optionLabel="name" 
+            placeholder="Select Role" class="w-full md:w-56" />
+        </div>
+        <p-button label="Submit" type="Submit" />
+    </form>
+    
+</div>

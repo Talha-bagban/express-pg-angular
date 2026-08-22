@@ -1,0 +1,186 @@
+
+
+<div class="container">
+   <p-button (onClick)="checkIn()" label="Check-In" />
+
+    <p-button (onClick)="checkOut()" label="Check-Out" />
+</div>
+
+<div class="container mb-4">
+  <div class="row">
+    <div class="col-md-3 mb-3">
+      <div class="card p-2" *ngIf="isAdmin">
+        <h4>Total Departments</h4>
+        <h2 class="text-success">{{ dashboardData?.totaldepartments }}</h2>
+      </div>
+      <div class="card p-2" *ngIf="userRole === 'manager'">
+        <h4>My Total projects</h4>
+        <h2 class="text-success">{{ dashboardData?.myprojects }}</h2>
+      </div>
+      <div class="card p-2" *ngIf="userRole === 'employee'">
+        <h4>Assigned Tasks</h4>
+        <h2 class="text-muted">{{ dashboardData?.assignedtasks }}</h2>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card p-2" *ngIf="isAdmin">
+        <h4>Total Managers</h4>
+        <h2 class="text-info">{{ dashboardData?.totalmanagers }}</h2>
+      </div>
+      <div class="card p-2" *ngIf="userRole === 'manager'">
+        <h4>My Tasks</h4>
+        <h2 class="text-danger">{{ dashboardData?.mytasks }}</h2>
+      </div>
+      <div class="card p-2" *ngIf="userRole === 'employee'">
+        <h4>Compeleted Tasks</h4>
+        <h2 class="text-success">{{ dashboardData?.completedtasks }}</h2>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card p-2" *ngIf="isAdmin">
+        <h4>Total Employees</h4>
+        <h2 class="text-primary">{{ dashboardData?.totalemployees }}</h2>
+      </div>
+      <div class="card p-2" *ngIf="userRole === 'manager'">
+        <h4>Compeleted Tasks</h4>
+        <h2 class="text-success">{{ dashboardData?.completedtasks }}</h2>
+      </div>
+      <div class="card p-2" *ngIf="userRole === 'employee'">
+        <h4>Pending Tasks</h4>
+        <h2 class="text-warning">{{ dashboardData?.pendingtasks }}</h2>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card p-2" *ngIf="isAdmin">
+        <h4>Total Projects</h4>
+        <h2 class="text-secondary">{{ dashboardData?.totalprojects }}</h2>
+      </div>
+      <div class="card p-2" *ngIf="userRole === 'manager'">
+        <h4>Pending Tasks</h4>
+        <h2 class="text-warning">{{ dashboardData?.pendingtasks }}</h2>
+      </div>
+      <div class="card p-2" *ngIf="userRole === 'employee'">
+        <h4>Upcoming Deadlines</h4>
+        <h2>{{ dashboardData?.upcomingdeadlines }}</h2>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card p-2" *ngIf="isAdmin">
+        <h4>Total Tasks</h4>
+        <h2 class="text-danger">{{ dashboardData?.totaltasks }}</h2>
+      </div>
+      <div class="card p-2" *ngIf="userRole === 'manager'">
+        <h4>My department employees</h4>
+        <h2 class="text-info">{{ dashboardData?.departmentemployees }}</h2>
+      </div>
+    </div>
+  </div>
+  <div class="row" *ngIf="userRole !== 'admin'">
+    <div class="col-md-6">
+      
+      <div class="card p-2 attendance-card">
+        <h5>Today's Attendance</h5>
+        <p>
+          Check In:
+          {{ check_in == null ? 'empty': check_in | date:'shortTime' }}
+        </p>
+        <p>
+          Check Out:
+          {{  check_out == null ? 'empty': check_out | date:'shortTime' }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- <div class="container" *ngIf="userRole === 'admin'">
+  <h3>User Table:-</h3>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Email</th>
+        <th scope="col">Status</th>
+        <th scope="col">Role</th>
+        <th scope="col">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let u of userList">
+        <th scope="row">{{ u.id }}</th>
+        <td>{{ u.firstname }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.role }}</td>
+        <td>{{ u.status }}</td>
+        <td>
+          <button
+            class="btn btn-warning me-2"
+            (click)="openDialog(u)"
+            type="button"
+          >
+            Edit
+          </button>
+          <button class="btn btn-danger" (click)="deleteUser(u.id)">
+            Delete
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div> -->
+
+<div class="container-fluid mb-4">
+  <div class="d-flex justify-content-between">
+    <h4>Company Calendar</h4>
+
+    <div class="d-flex gap-2">
+      <span>🔵 Tasks</span>
+      <span>🟢 Leaves</span>
+      <span>🟠 Projects</span>
+    </div>
+  </div>
+  <div>
+      <full-calendar
+      [options]="calendarOptions">
+    </full-calendar>
+  </div>
+</div>
+
+<p-dialog
+  header="Edit User"
+  [(visible)]="showDialog"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form [formGroup]="editform" (submit)="onSubmit()">
+    <br />
+    <p-floatlabel
+      ><input
+        id="firstname"
+        type="text"
+        pInputText
+        formControlName="firstname"
+        placeholder="Enter Name"
+      />
+      <label for="firstname">First Name</label></p-floatlabel
+    >
+    <br />
+    <p-floatlabel
+      ><input
+        id="email"
+        type="text"
+        pInputText
+        formControlName="email"
+        placeholder="Enter Email"
+      />
+      <label for="email">First Name</label></p-floatlabel
+    >
+    <!-- <input type="text" formControlName="city" placeholder="Enter City">
+    <input type="text" formControlName="address" placeholder="Enter Address"> -->
+    <!-- <button type="submit">Submit</button> -->
+    <p-button label="Submit" type="Submit" [disabled]="editform.invalid" />
+  </form>
+</p-dialog>

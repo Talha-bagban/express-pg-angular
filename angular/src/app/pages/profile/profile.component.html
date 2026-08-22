@@ -1,0 +1,207 @@
+<div class="container">
+  <div>
+    <button class="btn btn-warning me-3" (click)="editOpenDialog(currenUser)">
+      Edit
+    </button>
+    <button class="btn btn-success" (click)="changePswdOpenDialog()">
+      Change Password
+    </button>
+  </div>
+  <p class="mb-1">
+    <b>Name:- </b>{{ currenUser.firstname }} {{ currenUser.lastname }}
+  </p>
+  <p class="mb-1"><b>Email:- </b>{{ currenUser.email }}</p>
+  <p class="mb-1"><b>Role:- </b>{{ currenUser.role }}</p>
+  <p class="mb-1"><b>Status:- </b>{{ currenUser.status }}</p>
+  <p class="mb-1"><b>Deparment:- </b>{{ currenUser.department }}</p>
+</div>
+
+<p-dialog
+  header="Edit Profile"
+  [(visible)]="showDialog"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form [formGroup]="profileEditForm" (ngSubmit)="editProfileSubmit()">
+    <div class="row">
+      <div class="col-md-6 mb-4">
+        <input
+          type="text" pInputText
+          formControlName="firstname"
+          placeholder="Enter First Name"
+        />
+         <div
+            *ngIf="
+               profileEditForm.get('firstname')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="profileEditForm.get('firstname')?.errors?.['required']"
+              >First Name is Required</small
+            >
+            <small
+              class="text-danger"
+              *ngIf="profileEditForm.get('firstname')?.errors?.['minlength'] ||
+              profileEditForm.get('firstname')?.errors?.['maxlength'] "
+            >
+              FirstName should be atleast 2 to 50 characters.
+            </small>
+          </div>
+      </div>
+      <div class="col-md-6 mb-4">
+        <input
+          type="text" pInputText
+          formControlName="lastname"
+          placeholder="Enter Last Name"
+        />
+         <div
+            *ngIf="
+               profileEditForm.get('lastname')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="profileEditForm.get('lastname')?.errors?.['required']"
+              >Last Name is Required</small
+            >
+            <small
+              class="text-danger"
+              *ngIf="profileEditForm.get('lastname')?.errors?.['minlength'] ||
+              profileEditForm.get('lastname')?.errors?.['maxlength'] "
+            >
+              LastName should be atleast 2 to 50 characters.
+            </small>
+          </div>
+      </div>
+      <div class="col-md-6 mb-4">
+        <input type="email" pInputText formControlName="email" placeholder="Enter email" />
+        <div
+            *ngIf="
+              profileEditForm.get('email')?.invalid && profileEditForm.get('email')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="profileEditForm.get('email')?.errors?.['required']"
+              >Email is Required</small
+            >
+            <small
+              class="text-danger"
+              *ngIf="profileEditForm.get('email')?.errors?.['email']"
+            >
+              Please enter a valid email address.
+            </small>
+          </div>
+      </div>
+      <div class="col-md-6 mb-4">
+        <p-select
+          formControlName="status"
+          [options]="taskStatus"
+          optionValue="value"
+          optionLabel="name"
+          placeholder="Select status"
+          class="w-full md:w-56"
+          appendTo="body"
+        />
+      </div>
+    </div>
+    <p-button
+      label="Submit"
+      type="Submit"
+      [disabled]="profileEditForm.invalid"
+    />
+  </form>
+</p-dialog>
+
+<p-dialog
+  header="Change Password"
+  [(visible)]="changePswdshowDialog"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form [formGroup]="changePswdForm" (ngSubmit)="submitChangePswd()">
+    <div class="row">
+      <div class="col-md-12 mb-4">
+        <!-- <input
+          type="text"
+          formControlName="oldPassword"
+          placeholder="Enter old password"
+        /> -->
+        <p-floatlabel>
+          <p-password
+            id="oldPassword"
+            formControlName="oldPassword"
+            [toggleMask]="true"
+          />
+          <label for="oldPassword">Enter old password</label>
+        </p-floatlabel>
+      </div>
+
+      <div class="col-md-12 mb-4">
+        <!-- <input
+          type="text"
+          formControlName="newPassword"
+          placeholder="Enter new password"
+        /> -->
+        <p-floatlabel>
+          <p-password
+            id="newPassword"
+            formControlName="newPassword"
+            [toggleMask]="true"
+          />
+          <label for="newPassword">Enter new password</label>
+        </p-floatlabel>
+            <div
+          *ngIf="
+            changePswdForm.get('newPassword')?.invalid &&
+            changePswdForm.get('newPassword')?.touched
+          "
+        >
+          <small
+            class="text-danger"
+            *ngIf="changePswdForm.get('newPassword')?.errors?.['required']"
+            >Password is Required</small
+          >
+          <small
+            class="text-danger"
+            *ngIf="changePswdForm.get('newPassword')?.errors?.['minlength']"
+          >
+            Password must be at least 4 characters long.
+          </small>
+        </div>
+      </div>
+
+      <div class="col-md-12 mb-4">
+        <!-- <input
+          type="text"
+          formControlName="renewPassword"
+          placeholder="re-Enter new password"
+        /> -->
+         <p-floatlabel>
+          <p-password
+            id="renewPassword"
+            formControlName="renewPassword"
+            [toggleMask]="true"
+          />
+          <label for="renewPassword">re-Enter new password</label>
+        </p-floatlabel>
+        @if (changePswdForm.hasError('passwordMismatch') &&
+              changePswdForm.get('renewPassword')?.touched) {
+            <small class="text-danger">
+              Passwords do not match
+            </small>
+          }
+      </div>
+      <p-button
+        label="Submit"
+        type="Submit"
+        [disabled]="changePswdForm.invalid"
+      />
+    </div>
+  </form>
+</p-dialog>

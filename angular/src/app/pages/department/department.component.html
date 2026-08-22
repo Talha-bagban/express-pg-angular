@@ -1,0 +1,159 @@
+<div class="container mb-5">
+  <div class="d-flex justify-content-between mb-3">
+    <h2>All Department List</h2>
+    <button
+      class="btn btn-success"
+      *ngIf="isAdmin"
+      (click)="addDepartmentDialog()"
+    >
+      Create New Department
+    </button>
+  </div>
+  <div class="mb-2">
+    <input
+      class="w-75"
+      pInputText
+      type="text"
+      (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+      [(ngModel)]="search"
+      placeholder="Search departments.."
+    />
+    <p-select
+      [options]="statusOptions"
+      optionLabel="name"
+      optionValue="value"
+      placeholder="Filter By Status"
+      (onChange)="dt.filter($event.value, 'status', 'equals')"
+    />
+  </div>
+  <p-table
+    #dt 
+    [value]="allDept"
+    [paginator]="true"
+    [rows]="limit"
+    [totalRecords]="totalRecords"
+    [lazy]="true"
+    (onPage)="onPageChange($event)"
+    [globalFilterFields]="['name']"
+    responsiveLayout="scroll"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Name</th>
+        <th>Status</th>
+        <th *ngIf="isAdmin">Action</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-d>
+      <tr>
+        <td>
+          {{ d.name }}
+        </td>
+        <td>
+          {{ getStatusLabel(d.status) }}
+        </td>
+        <td *ngIf="isAdmin">
+          <button
+            class="btn btn-warning me-2"
+            type="button"
+            (click)="onEditDept(d)"
+          >
+            Edit
+          </button>
+          <button class="btn btn-danger" (click)="deleteDept(d.id)">
+            Delete
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  header="Create Department"
+  [(visible)]="createDepartmentDialog"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form [formGroup]="departmentForm" (ngSubmit)="createDepartment()">
+    <div class="mb-4">
+      <p-floatlabel>
+        <input id="name" pInputText formControlName="name" />
+        <label for="name">Name</label>
+      </p-floatlabel>
+
+      <div
+        *ngIf="
+            departmentForm.get('name')?.touched
+        "
+      >
+        <small
+          class="text-danger"
+          *ngIf="departmentForm.get('name')?.errors?.['required']"
+          >Name is Required</small
+        >
+        <small
+          class="text-danger"
+          *ngIf="departmentForm.get('name')?.errors?.['minlength'] ||
+          departmentForm.get('name')?.errors?.['maxlength'] "
+        >
+          Name should be atleast 2 character and Maximum 50 characters.
+        </small>
+      </div>
+    </div>
+    <p-button
+      label="Submit"
+      type="Submit"
+      [disabled]="departmentForm.invalid"
+    />
+  </form>
+</p-dialog>
+
+<p-dialog
+  header="Edit Department"
+  [(visible)]="showDialog"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form [formGroup]="updateform" (submit)="updateDept()">
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <input type="text" pInputText formControlName="name" placeholder="Enter Name" />
+        <div
+            *ngIf="
+               updateform.get('name')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="updateform.get('name')?.errors?.['required']"
+              >Name is Required</small
+            >
+            <small
+              class="text-danger"
+              *ngIf="updateform.get('name')?.errors?.['minlength'] ||
+              updateform.get('name')?.errors?.['maxlength'] "
+            >
+              Name should be atleast 2 character and Maximum 50 characters.
+            </small>
+          </div>
+      </div>
+      <div class="col-md-4">
+        <p-select
+          formControlName="status"
+          [options]="taskStatus"
+          optionValue="value"
+          optionLabel="name"
+          placeholder="Select status"
+          class="w-full md:w-56"
+          appendTo="body"
+        />
+      </div>
+    </div>
+    <p-button label="Submit" type="Submit" [disabled]="updateform.invalid" />
+  </form>
+</p-dialog>

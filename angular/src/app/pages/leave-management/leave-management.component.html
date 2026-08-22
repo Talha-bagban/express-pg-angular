@@ -1,0 +1,192 @@
+<div class="container-fluid">
+    <div class="d-flex justify-content-between mb-3">
+        <h2>Leave Management</h2>
+        <button class="btn btn-success" *ngIf="userRole !== 'admin'"  (click)="createProjectDialog()">Apply Leave</button>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <p-table 
+    #dt
+    [value]="leaves"
+    [paginator]="true"
+    [rows]="20"
+    [globalFilterFields]="['title', 'description']"
+    responsiveLayout="scroll"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th *ngIf="userRole !== 'employee'">Name</th>
+        <th>Leave Type</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Reason</th>
+        <th>Status</th>
+        <th>Approved / Rejected By</th>
+        <th>Action</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-l>
+      <tr>
+        <td *ngIf="userRole !== 'employee'">
+          {{ l.firstname }}
+          {{ l.lastname }}
+        </td>
+        <td>
+          {{ l.leave_type }}
+        </td>
+        <td>{{ l.start_date | date:'dd MMM yyyy' }}</td>
+        <td>
+          {{ l.end_date | date:'dd MMM yyyy'  }}
+        </td>
+        <td>
+          {{ l.reason }}
+        </td>
+        <td>
+          {{ l.status  }}
+        </td>
+        <td>
+          {{ l.approved_by_name }}
+          ({{ l.approved_by_role }})
+        </td>
+        <td *ngIf="userRole !== 'employee'">
+            <div *ngIf="l.status === 'pending' && l.user_id !== this.currentUser?.id">
+                <button class="btn btn-success me-1" (click)="updateStatus(l.id, 'approved', l.user_id)">
+                Approve
+                </button>
+                <button class="btn btn-danger"  (click)="updateStatus(l.id, 'rejected', l.user_id)">
+                Reject
+                </button>
+            </div>
+            <div *ngIf="l.status !== 'pending' ">***</div>
+        </td>
+        <td *ngIf="userRole === 'employee'">
+            <span *ngIf="l.status !== 'pending' ">**</span>
+            <button *ngIf="l.status === 'pending'" (click)="editLeave(l)" class="btn btn-warning me-2" type="button">Edit</button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+
+<p-dialog
+  header="Apply New Leave"
+  [(visible)]="applyLeave"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+    <form [formGroup]="applyLeaveForm" (ngSubmit)="onApply()">
+    <div class="row">
+          <div class="col-md-12 mb-4">
+            <p-select
+                formControlName="leave_type"
+                [options]="leaveTypes"
+                optionValue="value"
+                optionLabel="label"
+                placeholder="Select Leave Type"
+                class="w-full md:w-56"
+            />
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="flex-auto">
+            <label for="buttondisplay" class="font-bold mb-2"> Start Date </label>
+            <p-datepicker
+                [showIcon]="true"
+                formControlName="start_date"
+                inputId="buttondisplay"
+                [showOnFocus]="false"
+            />
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="flex-auto">
+            <label for="buttondisplay" class="font-bold mb-2"> End date </label>
+            <p-datepicker
+                [showIcon]="true"
+                formControlName="end_date"
+                inputId="buttondisplay"
+                [showOnFocus]="false"
+            />
+            </div>
+        </div>
+        <div class="col-md-12 mb-4">
+            <p-floatlabel>
+            <textarea
+                pTextarea
+                id="reason"
+                rows="3"
+                cols="70"
+                formControlName="reason"
+                class="h-full"
+            ></textarea>
+            <label for="reason">Reason</label>
+            </p-floatlabel>
+        </div>
+    </div>
+        <p-button label="Submit" type="Submit" [disabled]="applyLeaveForm.invalid" />
+    </form>
+
+</p-dialog>
+
+<p-dialog
+  header="Edit Leave"
+  [(visible)]="editLeaveDialog"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  [draggable]="false"
+  [resizable]="false"
+> 
+  <form [formGroup]="editLeaveForm" (ngSubmit)="onEdit()">
+    <div class="row">
+      <div class="col-md-12 mb-4">
+        <p-select
+          formControlName="leave_type"
+          [options]="leaveTypes"
+          optionValue="value"
+          optionLabel="label"
+          placeholder="Select Leave Type"
+          class="w-full md:w-56"
+          />
+      </div>
+       <div class="col-md-6 mb-4">
+            <div class="flex-auto">
+            <label for="buttondisplay" class="font-bold mb-2"> Start Date </label>
+            <p-datepicker
+                [showIcon]="true"
+                formControlName="start_date"
+                inputId="buttondisplay"
+                [showOnFocus]="false"
+            />
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="flex-auto">
+            <label for="buttondisplay" class="font-bold mb-2"> End date </label>
+            <p-datepicker
+                [showIcon]="true"
+                formControlName="end_date"
+                inputId="buttondisplay"
+                [showOnFocus]="false"
+            />
+            </div>
+        </div>
+        <div class="col-md-12 mb-4">
+            <p-floatlabel>
+            <textarea
+                pTextarea
+                id="reason"
+                rows="3"
+                cols="70"
+                formControlName="reason"
+                class="h-full"
+            ></textarea>
+            <label for="reason">Reason</label>
+            </p-floatlabel>
+        </div>
+    </div>
+    <p-button label="Submit" type="Submit" [disabled]="editLeaveForm.invalid" />
+  </form>
+</p-dialog>

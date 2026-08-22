@@ -1,0 +1,195 @@
+<div class="container-fluid">
+  <div class="row flex-nowrap vh-100">
+    <div class="col-auto col-md-4 col-xl-2 px-sm-2 px-0 bg-dark sidebar">
+      <div
+        class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100"
+      >
+        <div class="logo-section">
+          <div class="logo">
+            <i class="pi pi-users" style="font-size: 35px"></i>
+          </div>
+          <div class="logo-text">
+            <h2>EMS</h2>
+            <span>DASHBOARD</span>
+          </div>
+          <button class="menu-btn">
+            <i class="pi pi-bars"></i>
+          </button>
+        </div>
+        <ul
+          class="nav nav-pills w-100 flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
+          id="menu"
+        >
+          <li class="nav-item w-100 w-100">
+            <a
+              routerLink="/dashboard"
+              routerLinkActive="active"
+              class="my-2 menu-item nav-link w-100"
+            >
+              <i class="pi pi-home"></i
+              ><span class="ms-1 d-none d-sm-inline">Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item w-100">
+            <a
+              routerLink="/department"
+              routerLinkActive="active"
+              class="my-1 menu-item nav-link w-100"
+            >
+              <i class="pi pi-building"></i
+              ><span class="ms-1 d-none d-sm-inline">Department</span>
+            </a>
+          </li>
+          <li class="nav-item w-100">
+            <a
+              routerLink="/manager"
+              routerLinkActive="active"
+              class="my-1 menu-item nav-link w-100"
+            >
+              <i class="pi pi-user"></i
+              ><span class="ms-1 d-none d-sm-inline">Manager</span>
+            </a>
+          </li>
+          <li class="nav-item w-100">
+            <a
+              routerLink="/employee"
+              routerLinkActive="active"
+              class="my-1 menu-item nav-link w-100"
+            >
+              <i class="pi pi-users"></i>
+              <span class="ms-1 d-none d-sm-inline">Employee</span>
+            </a>
+          </li>
+          <li class="nav-item w-100">
+            <a
+              routerLink="/task"
+              routerLinkActive="active"
+              class="my-1 menu-item nav-link w-100"
+            >
+              <i class="pi pi-check-square"></i
+              ><span class="ms-1 d-none d-sm-inline">Task</span>
+            </a>
+          </li>
+          <li class="nav-item w-100">
+            <a
+              routerLink="/project"
+              routerLinkActive="active"
+              class="my-1 menu-item nav-link w-100"
+            >
+              <i class="pi pi-folder"></i
+              ><span class="ms-1 d-none d-sm-inline">Project</span>
+            </a>
+          </li>
+          <li class="nav-item w-100">
+            <a
+              routerLink="/attendance"
+              routerLinkActive="active"
+              class="my-1 menu-item nav-link w-100"
+            >
+              <i class="pi pi-clipboard"></i
+              ><span class="ms-1 d-none d-sm-inline">attendance</span>
+            </a>
+          </li>
+          <li class="nav-item w-100">
+            <a
+              routerLink="/leave-management"
+              routerLinkActive="active"
+              class="my-1 menu-item nav-link w-100"
+            >
+              <i class="pi pi-book"></i
+              ><span class="ms-1 d-none d-sm-inline">Leave</span>
+            </a>
+          </li>
+           <li class="nav-item w-100">
+            <a
+              routerLink="/practice"
+              routerLinkActive="active"
+              class="my-1 menu-item nav-link w-100"
+            >
+              <i class="pi pi-book"></i
+              ><span class="ms-1 d-none d-sm-inline">practice</span>
+            </a>
+          </li>
+        </ul>
+        <hr />
+        <div
+          routerLink="/profile"
+          class="w-100 profile-card"
+          style="cursor: pointer"
+        >
+          <img
+            src="https://img.magnific.com/premium-vector/man-professional-business-casual-young-avatar-icon-illustration_1277826-623.jpg?semt=ais_hybrid&w=740&q=80"
+            alt="user"
+            class="avatar"
+          />
+          <div class="user-info">
+            <p class="mb-1 text-white">
+              {{ currenUser.firstname }} {{ currenUser.lastname }}
+            </p>
+            <p class="mb-1">{{ currenUser.role }}</p>
+          </div>
+          <!-- <p class="mb-1"><b>Deparment:- </b>{{currenUser.department}}</p> -->
+        </div>
+        <button class="mb-2 w-100 btn logout" (click)="logout()">
+          <i class="pi pi-sign-out"></i> Log out
+        </button>
+      </div>
+    </div>
+    <div class="col p-0" style="overflow-y: scroll">
+      <div
+        class="header"
+        style="
+          height: 40px;
+          background: linear-gradient(180deg, #071426, #09111f);
+          position: fixed;
+          width: 100%;
+          z-index: 99;
+        "
+      >
+        <div class="mb-4">
+          <div class="d-flex align-items-center gap-1">
+            <h4 class="text-white">Notifications</h4>
+
+            <div class="notification-wrapper">
+              <button
+                pButton
+                type="button"
+                icon="pi pi-bell"
+                (click)="openNotifications($event)"
+                class="notification-btn"
+              >
+                <p-badge *ngIf="unreadCount > 0" [value]="unreadCount">
+                </p-badge>
+              </button>
+
+              <p-popover #op>
+                <div class="notification-container">
+                  <div
+                    (click)="markAsRead(n)"
+                    *ngFor="let n of notifications"
+                    class="notification-item"
+                  >
+                    <div *ngIf="!n.is_read" class="unread-dot"></div>
+                    <div>
+                      <h6>{{ n.title }}</h6>
+                      <p>{{ n.message }}</p>
+                      <small>
+                        {{ n.created_at | date: "short" }}
+                      </small>
+                    </div>
+                  </div>
+                  <div *ngIf="notifications.length === 0" class="empty-state">
+                    No notifications
+                  </div>
+                </div>
+              </p-popover>
+            </div>
+
+            <p-toast></p-toast>
+          </div>
+        </div>
+      </div>
+      <div class="py-3 px-2" style="margin-top: 40px"><router-outlet /></div>
+    </div>
+  </div>
+</div>

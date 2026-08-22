@@ -1,0 +1,327 @@
+<div class="container mb-5">
+  <div class="d-flex justify-content-between mb-3">
+    <h2>All Employee List</h2>
+    <button
+      class="btn btn-success"
+      *ngIf="userRole !== 'employee'"
+      (click)="addemployeeDialog()"
+    >
+      Add new employee
+    </button>
+  </div>
+
+  <div class="mb-2">
+    <input
+      class="w-75"
+      pInputText
+      type="text"
+      (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+      [(ngModel)]="search"
+      placeholder="Search departments.."
+    />
+    <p-select
+      [options]="statusOptions"
+      optionLabel="name"
+      optionValue="value"
+      placeholder="Filter By Status"
+      (onChange)="dt.filter($event.value, 'status', 'equals')"
+    />
+  </div>
+
+  <p-table
+    #dt
+    [value]="employeeList"
+    [paginator]="true"
+    [rows]="20"
+    [globalFilterFields]="['firstname', 'lastname', 'email', 'department']"
+    responsiveLayout="scroll"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Department</th>
+        <th>Status</th>
+        <th *ngIf="userRole !== 'employee'">Action</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-d>
+      <tr>
+        <td>{{ d.firstname }} {{ d.lastname }}</td>
+        <td>
+          {{ d.email }}
+        </td>
+        <td>
+          {{ d.department }}
+        </td>
+        <td>
+          {{ getStatusLabel(d.status) }}
+        </td>
+        <td *ngIf="userRole !== 'employee'">
+          <button
+            class="btn btn-warning me-2"
+            type="button"
+            (click)="onEdit(d)"
+          >
+            Edit
+          </button>
+          <button
+            *ngIf="isAdmin"
+            class="btn btn-danger"
+            (click)="deleteEmployee(d.id)"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  header="Add New Employee"
+  [(visible)]="addEmployeeShowDialog"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()">
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <p-floatlabel>
+          <input id="firstname" pInputText formControlName="firstname" />
+          <label for="firstname">First Name</label>
+        </p-floatlabel>
+        <div *ngIf="employeeForm.get('firstname')?.touched">
+          <small
+            class="text-danger"
+            *ngIf="employeeForm.get('firstname')?.errors?.['required']"
+            >Name is Required</small
+          >
+          <small
+            class="text-danger"
+            *ngIf="
+              employeeForm.get('firstname')?.errors?.['minlength'] ||
+              employeeForm.get('firstname')?.errors?.['maxlength']
+            "
+          >
+            FirstName should be atleast 2 to 50 characters.
+          </small>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <p-floatlabel>
+          <input id="lastname" pInputText formControlName="lastname" />
+          <label for="lastname">Last Name</label>
+        </p-floatlabel>
+        <div *ngIf="employeeForm.get('lastname')?.touched">
+          <small
+            class="text-danger"
+            *ngIf="employeeForm.get('lastname')?.errors?.['required']"
+            >Name is Required</small
+          >
+          <small
+            class="text-danger"
+            *ngIf="
+              employeeForm.get('lastname')?.errors?.['minlength'] ||
+              employeeForm.get('lastname')?.errors?.['maxlength']
+            "
+          >
+            LastName should be atleast 2 to 50 characters.
+          </small>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <p-floatlabel>
+          <input id="email" pInputText formControlName="email" />
+          <label for="email">email</label>
+        </p-floatlabel>
+        <div
+          *ngIf="
+            employeeForm.get('email')?.invalid &&
+            employeeForm.get('email')?.touched
+          "
+        >
+          <small
+            class="text-danger"
+            *ngIf="employeeForm.get('email')?.errors?.['required']"
+            >Email is Required</small
+          >
+          <small
+            class="text-danger"
+            *ngIf="employeeForm.get('email')?.errors?.['email']"
+          >
+            Please enter a valid email address.
+          </small>
+        </div>
+      </div>
+      <div class="col-md-5 mb-4">
+        <p-floatlabel>
+          <p-password
+            id="password"
+            formControlName="password"
+            [toggleMask]="true"
+          />
+          <label for="password">Password</label>
+        </p-floatlabel>
+        <div
+          *ngIf="
+            employeeForm.get('password')?.invalid &&
+            employeeForm.get('password')?.touched
+          "
+        >
+          <small
+            class="text-danger"
+            *ngIf="employeeForm.get('password')?.errors?.['required']"
+            >Password is Required</small
+          >
+          <small
+            class="text-danger"
+            *ngIf="employeeForm.get('password')?.errors?.['minlength']"
+          >
+            Password must be at least 4 characters long.
+          </small>
+        </div>
+      </div>
+      <div class="col-md-5 mb-4">
+        <p-select
+          formControlName="department_id"
+          [options]="departments"
+          optionValue="id"
+          optionLabel="name"
+          placeholder="Select Department"
+          class="w-full md:w-56"
+          appendTo="body"
+        />
+        @if (
+          employeeForm.get("department_id")?.touched &&
+          employeeForm.get("department_id")?.hasError("required")
+        ) {
+          <small class="text-danger"> Department is required. </small>
+        }
+      </div>
+    </div>
+    <p-button label="Submit" type="Submit" [disabled]="employeeForm.invalid" />
+  </form>
+</p-dialog>
+
+<p-dialog
+  header="Edit Employee"
+  [(visible)]="showDialog"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form [formGroup]="editEmployeeform" (submit)="onEditSubmit()">
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <p-floatlabel
+          ><input
+            type="text"
+            pInputText
+            formControlName="firstname"
+            placeholder="Enter Name"
+          /><label for="firstname">firstname</label></p-floatlabel
+        >
+        <div *ngIf="editEmployeeform.get('firstname')?.touched">
+          <small
+            class="text-danger"
+            *ngIf="editEmployeeform.get('firstname')?.errors?.['required']"
+            >Name is Required</small
+          >
+          <small
+            class="text-danger"
+            *ngIf="
+              editEmployeeform.get('firstname')?.errors?.['minlength'] ||
+              editEmployeeform.get('firstname')?.errors?.['maxlength']
+            "
+          >
+            FirstName should be atleast 2 to 50 characters.
+          </small>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <p-floatlabel
+          ><input
+            type="text"
+            pInputText
+            formControlName="lastname"
+            placeholder="Enter lastname"
+          /><label for="lastname">lastname</label></p-floatlabel
+        >
+        <div *ngIf="editEmployeeform.get('lastname')?.touched">
+          <small
+            class="text-danger"
+            *ngIf="editEmployeeform.get('lastname')?.errors?.['required']"
+            >Name is Required</small
+          >
+          <small
+            class="text-danger"
+            *ngIf="
+              editEmployeeform.get('lastname')?.errors?.['minlength'] ||
+              editEmployeeform.get('lastname')?.errors?.['maxlength']
+            "
+          >
+            LastName should be atleast 2 to 50 characters.
+          </small>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <p-floatlabel>
+          <input id="email" pInputText formControlName="email" />
+          <label for="email">email</label>
+        </p-floatlabel>
+        <div
+          *ngIf="
+            editEmployeeform.get('email')?.invalid &&
+            editEmployeeform.get('email')?.touched
+          "
+        >
+          <small
+            class="text-danger"
+            *ngIf="editEmployeeform.get('email')?.errors?.['required']"
+            >Email is Required</small
+          >
+          <small
+            class="text-danger"
+            *ngIf="editEmployeeform.get('email')?.errors?.['email']"
+          >
+            Please enter a valid email address.
+          </small>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <p-select
+          formControlName="department_id"
+          [options]="departments"
+          optionValue="id"
+          optionLabel="name"
+          placeholder="Select Department"
+          class="w-full md:w-56"
+          appendTo="body"
+        />
+        @if (
+          editEmployeeform.get("department_id")?.touched &&
+          editEmployeeform.get("department_id")?.hasError("required")
+        ) {
+          <small class="text-danger"> Department is required. </small>
+        }
+      </div>
+      <div class="col-md-4 mb-4">
+        <p-select
+          formControlName="status"
+          [options]="taskStatus"
+          optionValue="value"
+          optionLabel="name"
+          placeholder="Select status"
+          class="w-full md:w-56"
+          appendTo="body"
+        />
+      </div>
+    </div>
+    <!-- <button type="submit">Submit</button> -->
+    <p-button label="Submit" type="Submit" />
+  </form>
+</p-dialog>

@@ -1,0 +1,144 @@
+.sidebar {
+//   height: 100vh;
+    width: 300px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(
+    180deg,
+    #071426,
+    #09111f
+  );
+  color: white;
+  overflow-y: scroll;
+}
+.sidebar::-webkit-scrollbar{
+  display: none;
+}
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 40px;
+width: 100%;
+}
+
+.logo {
+  font-size: 40px;
+  color: #2f6dff;
+}
+
+.logo-text h2 {
+  margin: 0;
+  font-size: 30px;
+}
+
+.logo-text span {
+  color: #7f8ca8;
+  letter-spacing: 3px;
+font-size: 12px;
+}
+
+.menu-btn {
+  margin-left: auto;
+  width: 55px;
+  height: 55px;
+  border-radius: 15px;
+  border: 1px solid #2d3c57;
+  background: transparent;
+  color: white;
+}
+.menu-item.nav-link.active{
+    background: linear-gradient(
+    90deg,
+    #2458ff,
+    #3a44ff
+  );
+  color: white;
+  border: 1px solid #4ea1ff;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    border-radius: 10px;
+}
+.logout{
+    border: 1px solid #ff4f7a;
+    border-radius: 10px;
+    background: rgba(255, 79, 122, 0.08);
+    color: #ff5a82;
+    cursor: pointer;
+}
+.profile-card{
+    display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #24344f;
+  margin-bottom: 20px;
+}
+.avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+}
+
+.user-info h4 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.user-info p {
+  margin: 5px 0;
+  color: #2f6dff;
+}
+
+//notification start
+
+.notification-btn {
+  position: relative;
+}
+
+.notification-container {
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  display: flex;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;    
+  gap: 10px;
+  align-items: baseline;
+}
+
+.notification-item h6 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.notification-item p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.notification-item small {
+  color: #888;
+}
+
+.empty-state {
+  padding: 20px;
+  text-align: center;
+}
+.unread-dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3b82f6 !important;
+  flex-shrink: 0;
+  background: #eff6ff;
+  border-left: 3px solid #3b82f6;
+}
+
+//notification end

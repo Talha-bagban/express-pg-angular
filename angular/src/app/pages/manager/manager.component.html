@@ -1,0 +1,326 @@
+<div class="container mb-5">
+  <div class="d-flex justify-content-between mb-3">
+    <h2>All Manager List</h2>
+    <button *ngIf="isAdmin"
+      class="btn btn-success"
+      (click)="addManagerDialog()"
+    >
+      Add new Manager
+    </button>
+  </div>
+
+
+  <div class="mb-2">
+    <input
+      class="w-75"
+      pInputText
+      type="text"
+      (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+      [(ngModel)]="search"
+      placeholder="Search departments.."
+    />
+    <p-select
+      [options]="statusOptions"
+      optionLabel="name"
+      optionValue="value"
+      placeholder="Filter By Status"
+      (onChange)="dt.filter($event.value, 'status', 'equals')"
+    />
+  </div>
+
+
+  <p-table
+    #dt
+    [value]="managerList"
+    [paginator]="true"
+    [rows]="6"
+    [globalFilterFields]="['firstname', 'lastname', 'email' ,'department']"
+    responsiveLayout="scroll"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Department</th>
+        <th>Status</th>
+        <th *ngIf="isAdmin">Action</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-m>
+      <tr>
+        <td>{{ m.firstname }} {{ m.lastname }}</td>
+        <td>
+          {{ m.email }}
+        </td>
+        <td>
+          {{ m.department }}
+        </td>
+        <td>
+          {{ getStatusLabel(m.status) }}
+        </td>
+        <td *ngIf="isAdmin">
+          <button
+            class="btn btn-warning me-2"
+            type="button"
+            (click)="onEditManager(m)"
+          >
+            Edit
+          </button>
+          <button class="btn btn-danger" (click)="deleteEmployee(m.id)">
+            Delete
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  header="Add New Manager"
+  [(visible)]="addManagerShowDialog"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form [formGroup]="managerForm" (ngSubmit)="onCreateManager()">
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <p-floatlabel>
+          <input id="firstname" pInputText formControlName="firstname" />
+          <label for="firstname">First Name</label>
+        </p-floatlabel>
+         <div
+            *ngIf="
+               managerForm.get('firstname')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="managerForm.get('firstname')?.errors?.['required']"
+              >First Name is Required</small
+            >
+            <small
+              class="text-danger"
+              *ngIf="managerForm.get('firstname')?.errors?.['minlength'] ||
+              managerForm.get('firstname')?.errors?.['maxlength'] "
+            >
+              FirstName should be atleast 2 to 50 characters.
+            </small>
+          </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <p-floatlabel>
+          <input id="lastname" pInputText formControlName="lastname" />
+          <label for="lastname">Last Name</label>
+        </p-floatlabel>
+        
+         <div
+            *ngIf="
+               managerForm.get('lastname')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="managerForm.get('lastname')?.errors?.['required']"
+              >Last Name is Required</small
+            >
+            <small
+              class="text-danger"
+              *ngIf="managerForm.get('lastname')?.errors?.['minlength'] ||
+              managerForm.get('lastname')?.errors?.['maxlength'] "
+            >
+              LastName should be atleast 2 to 50 characters.
+            </small>
+          </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <p-floatlabel>
+          <input id="email" pInputText formControlName="email" />
+          <label for="email">email</label>
+        </p-floatlabel>
+        <div
+            *ngIf="
+              managerForm.get('email')?.invalid && managerForm.get('email')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="managerForm.get('email')?.errors?.['required']"
+              >Email is Required</small
+            >
+            <small
+              class="text-danger"
+              *ngIf="managerForm.get('email')?.errors?.['email']"
+            >
+              Please enter a valid email address.
+            </small>
+          </div>
+      </div>
+      <div class="col-md-5 mb-4">
+        <p-floatlabel>
+          <p-password
+            id="password"
+            formControlName="password"
+            [toggleMask]="true"
+          />
+          <label for="password">Password</label>
+        </p-floatlabel>
+         <div
+          *ngIf="
+            managerForm.get('password')?.invalid &&
+            managerForm.get('password')?.touched
+          "
+        >
+          <small
+            class="text-danger"
+            *ngIf="managerForm.get('password')?.errors?.['required']"
+            >Password is Required</small
+          >
+          <small
+            class="text-danger"
+            *ngIf="managerForm.get('password')?.errors?.['minlength']"
+          >
+            Password must be at least 4 characters long.
+          </small>
+        </div>
+      </div>
+      <div class="col-md-5 mb-4">
+        <p-select
+          formControlName="department_id"
+          [options]="departments"
+          optionValue="id"
+          optionLabel="name"
+          placeholder="Select Department"
+          class="w-full md:w-56"
+          appendTo="body"
+        />
+        @if (managerForm.get('department_id')?.touched &&
+            managerForm.get('department_id')?.hasError('required')) {
+          <small class="text-danger">
+            Department is required.
+          </small>
+        }
+      </div>
+    </div>
+    <p-button label="Submit" type="Submit" [disabled]="managerForm.invalid" />
+  </form>
+</p-dialog>
+
+<p-dialog
+  header="Update Manager"
+  [(visible)]="updateManagerShowDialog"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form [formGroup]="updatemanagerForm" (ngSubmit)="onUpdateManager()">
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <p-floatlabel>
+          <input id="firstname" pInputText formControlName="firstname" />
+          <label for="firstname">First Name</label>
+        </p-floatlabel>
+        <div
+            *ngIf="
+               updatemanagerForm.get('firstname')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="updatemanagerForm.get('firstname')?.errors?.['required']"
+              >Name is Required</small
+            >
+            <small
+              class="text-danger"
+              *ngIf="updatemanagerForm.get('firstname')?.errors?.['minlength'] ||
+              updatemanagerForm.get('firstname')?.errors?.['maxlength'] "
+            >
+              FirstName should be atleast 2 to 50 characters.
+            </small>
+          </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <p-floatlabel>
+          <input id="lastname" pInputText formControlName="lastname" />
+          <label for="lastname">Last Name</label>
+        </p-floatlabel>
+        <div
+            *ngIf="
+               updatemanagerForm.get('lastname')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="updatemanagerForm.get('lastname')?.errors?.['required']"
+              >Name is Required</small
+            >
+            <small
+              class="text-danger"
+              *ngIf="updatemanagerForm.get('lastname')?.errors?.['minlength'] ||
+              updatemanagerForm.get('lastname')?.errors?.['maxlength'] "
+            >
+              LastName should be atleast 2 to 50 characters.
+            </small>
+          </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <p-floatlabel>
+          <input id="email" pInputText formControlName="email" />
+          <label for="email">email</label>
+        </p-floatlabel>
+        <div
+            *ngIf="
+              updatemanagerForm.get('email')?.invalid && updatemanagerForm.get('email')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="updatemanagerForm.get('email')?.errors?.['required']"
+              >Email is Required</small
+            >
+            <small
+              class="text-danger"
+              *ngIf="updatemanagerForm.get('email')?.errors?.['email']"
+            >
+              Please enter a valid email address.
+            </small>
+          </div>
+      </div>
+      <div class="col-md-5 mb-4">
+        <p-select
+          formControlName="department_id"
+          [options]="departments"
+          optionValue="id"
+          optionLabel="name"
+          placeholder="Select Department"
+          class="w-full md:w-56"
+          appendTo="body"
+        />
+        @if (updatemanagerForm.get('department_id')?.touched &&
+            updatemanagerForm.get('department_id')?.hasError('required')) {
+          <small class="text-danger">
+            Department is required.
+          </small>
+        }
+      </div>
+      <div class="col-md-4 mb-4">
+        <p-select
+          formControlName="status"
+          [options]="taskStatus"
+          optionValue="value"
+          optionLabel="name"
+          placeholder="Select status"
+          class="w-full md:w-56"
+          appendTo="body"
+        />
+      </div>
+    </div>
+    <p-button
+      label="Submit"
+      type="Submit"
+      [disabled]="updatemanagerForm.invalid"
+    />
+  </form>
+</p-dialog>

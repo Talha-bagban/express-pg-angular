@@ -1,0 +1,422 @@
+<div class="container mb-5">
+  <div class="d-flex justify-content-between">
+    <h2>Read All Tasks</h2>
+    <button
+      class="btn btn-success mb-3"
+      *ngIf="userRole !== 'employee'"
+      (click)="openCreateTask()"
+    >
+      Create Task
+    </button>
+  </div>
+
+  <div class="mb-2">
+    <input
+      class="w-75"
+      pInputText
+      type="text"
+      (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+      [(ngModel)]="search"
+      placeholder="Search departments.."
+    />
+    <p-select
+      [options]="statusOptions"
+      optionLabel="name"
+      optionValue="value"
+      placeholder="Filter By Status"
+      (onChange)="dt.filter($event.value, 'status', 'equals')"
+    />
+  </div>
+
+  <p-table
+    #dt
+    [value]="tasks"
+    [paginator]="true"
+    [rows]="20"
+    [globalFilterFields]="['title', 'description', 'project_name']"
+    responsiveLayout="scroll"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Project Name</th>
+        <th>priority</th>
+        <th>assigned_to</th>
+        <th>Status</th>
+        <th>created_by</th>
+        <th>due_date</th>
+        <th>Action</th>
+      </tr>
+      <tr *ngIf="loading">
+          <p-progress-spinner ariaLabel="loading" />
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-t>
+      <tr (click)="taskDetail(t)" style="cursor: pointer;">
+        <td>
+          {{ t.title }}
+        </td>
+        <td>{{ t.description }}</td>
+        <td>
+          {{ t.project_name }}
+        </td>
+        <td>
+          <span class="badge rounded-pill" [ngClass]="getPriorityByClass(t.priority)">{{ t.priority }}</span>
+        </td>
+        <td>
+          {{ t.assigned_employee }}
+        </td>
+        <td>
+          <span class="badge rounded-pill" [ngClass]="getStatusByClass(t.status)">{{t.status }}</span>
+        </td>
+        <td>
+          {{ t.created_employee }}
+        </td>
+        <td>
+          {{ t.due_date | date: "dd MMM yyyy, hh:mm a"}}
+          <span *ngIf="isOverdue(t)" class="badge bg-danger rounded-pill"> Overdue </span>
+        </td>
+        <td style="z-index: 999999;">
+          <button
+            class="btn btn-warning me-2"
+            type="button"
+            (click)="editTask(t, $event)"
+          >
+            Edit
+          </button>
+          <button class="btn btn-danger" (click)="deleteTask(t.id,  $event)">
+            Delete
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  header="Assign New Task"
+  [(visible)]="createTaskShowDialog"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form [formGroup]="taskForm" (ngSubmit)="onCreate()">
+    <div class="row mt-4">
+      <div class="col-md-12 mb-4">
+        <p-floatlabel>
+          <input id="title" pInputText formControlName="title" />
+          <label for="title">title</label>
+        </p-floatlabel>
+        <div
+            *ngIf="
+               taskForm.get('title')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="taskForm.get('title')?.errors?.['required']"
+              >Title is Required</small
+            >
+            <small
+              class="text-danger"
+              *ngIf="taskForm.get('title')?.errors?.['minlength'] ||
+              taskForm.get('title')?.errors?.['maxlength'] "
+            >
+              Title should be atleast 3 to 50 characters.
+            </small>
+          </div>
+      </div>
+      <div class="col-md-12 mb-4">
+        <p-floatlabel>
+          <textarea
+            pTextarea
+            id="description"
+            rows="3"
+            cols="70"
+            formControlName="description"
+            class="h-full"
+          ></textarea>
+          <label for="description">description</label>
+        </p-floatlabel>
+         <div
+            *ngIf="
+               taskForm.get('description')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="taskForm.get('description')?.errors?.['required']"
+              >Description is Required</small
+            >
+            <small
+              class="text-danger"
+              *ngIf="taskForm.get('description')?.errors?.['minlength'] ||
+              taskForm.get('description')?.errors?.['maxlength'] "
+            >
+              Description should be atleast 5 to 200 characters.
+            </small>
+          </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <p-select
+          formControlName="priority"
+          [options]="priority"
+          optionValue="id"
+          optionLabel="name"
+          placeholder="Select priority"
+          class="w-full md:w-56"
+        />
+        <div
+            *ngIf="
+               taskForm.get('priority')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="taskForm.get('priority')?.errors?.['required']"
+              >priority is Required</small
+            >
+          </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <p-select
+          formControlName="assigned_to"
+          [options]="employees"
+          optionValue="id"
+          optionLabel="firstname"
+          placeholder="Assign Employee"
+          class="w-full md:w-56"
+        />
+        <div
+            *ngIf="
+               taskForm.get('assigned_to')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="taskForm.get('assigned_to')?.errors?.['required']"
+              >Assigned To is Required</small
+            >
+          </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <p-select
+          formControlName="project"
+          [options]="projects"
+          optionValue="id"
+          optionLabel="title"
+          placeholder="Select Project"
+          class="w-full md:w-56"
+        />
+        <div
+            *ngIf="
+               taskForm.get('project')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="taskForm.get('project')?.errors?.['required']"
+              >Select project is Required</small
+            >
+          </div>
+      </div>
+      <div class="col-md-6 mb-4">
+        <div class="flex-auto">
+          <label for="buttondisplay" class="font-bold mb-2"> Due Date </label>
+          <p-datepicker
+            [showIcon]="true"
+            formControlName="due_date"
+            inputId="buttondisplay"
+            [showOnFocus]="false"
+          />
+        <div
+            *ngIf="
+               taskForm.get('due_date')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="taskForm.get('due_date')?.errors?.['required']"
+              >Due Date  is Required</small
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <p-button label="Submit" type="Submit" [disabled]="taskForm.invalid" />
+  </form>
+</p-dialog>
+
+<p-dialog
+  header="Edit Task"
+  [(visible)]="showDialog"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form [formGroup]="editTaskform" (submit)="onEditSubmit()">
+    <div class="row">
+      <div class="col-md-12 mb-4" *ngIf="userRole !== 'employee'">
+        <p-floatlabel>
+          <input id="title" pInputText formControlName="title" />
+          <label for="title">title</label>
+        </p-floatlabel>
+         <div
+            *ngIf="
+               editTaskform.get('title')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="editTaskform.get('title')?.errors?.['required']"
+              >Title is Required</small
+            >
+            <small
+              class="text-danger"
+              *ngIf="editTaskform.get('title')?.errors?.['minlength'] ||
+              editTaskform.get('title')?.errors?.['maxlength'] "
+            >
+              Title should be atleast 3 to 50 characters.
+            </small>
+          </div>
+      </div>
+      <div class="col-md-12 mb-4" *ngIf="userRole !== 'employee'">
+        <p-floatlabel>
+          <textarea
+            pTextarea
+            id="description"
+            rows="3"
+            cols="70"
+            formControlName="description"
+            class="h-full"
+          ></textarea>
+          <label for="description">description</label>
+        </p-floatlabel>
+        <div
+            *ngIf="
+               editTaskform.get('description')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="editTaskform.get('description')?.errors?.['required']"
+              >Description is Required</small
+            >
+            <small
+              class="text-danger"
+              *ngIf="editTaskform.get('description')?.errors?.['minlength'] ||
+              editTaskform.get('description')?.errors?.['maxlength'] "
+            >
+              Description should be atleast 5 to 200 characters.
+            </small>
+          </div>
+      </div>
+      <div class="col-md-3 mb-4" *ngIf="userRole !== 'employee'">
+        <p-select
+          formControlName="priority"
+          [options]="priority"
+          optionValue="id"
+          optionLabel="name"
+          placeholder="Select priority"
+          class="w-full md:w-56"
+          appendTo="body"
+        />
+        <div
+            *ngIf="
+               editTaskform.get('priority')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="editTaskform.get('priority')?.errors?.['required']"
+              >priority is Required</small
+            >
+        </div>
+      </div>
+      <div class="col-md-3 mb-4" *ngIf="userRole !== 'employee'">
+        <p-select
+          formControlName="assigned_to"
+          [options]="employees"
+          optionValue="id"
+          optionLabel="firstname"
+          placeholder="Assign Employee"
+          class="w-full md:w-56"
+          appendTo="body"
+        />
+        <div
+            *ngIf="
+               editTaskform.get('assigned_to')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="editTaskform.get('assigned_to')?.errors?.['required']"
+              >Assigned To is Required</small
+            >
+          </div>
+      </div>
+      <div class="col-md-3 mb-4">
+        <p-select
+          formControlName="status"
+          [options]="taskStatus"
+          optionValue="value"
+          optionLabel="name"
+          placeholder="Select status"
+          class="w-full md:w-56"
+          appendTo="body"
+        />
+      </div>
+      <div class="col-md-3 mb-4" *ngIf="userRole !== 'employee'">
+        <p-select
+          formControlName="project_id"
+          [options]="projects"
+          optionValue="id"
+          optionLabel="title"
+          placeholder="Select Project"
+          class="w-full md:w-56"
+        />
+        
+        <div
+            *ngIf="
+               editTaskform.get('project_id')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="editTaskform.get('project_id')?.errors?.['required']"
+              >Select project is Required</small
+            >
+          </div>
+      </div>
+      <div class="col-md-6 mb-4" *ngIf="userRole !== 'employee'">
+        <div class="flex-auto">
+          <label for="buttondisplay" class="font-bold block mb-2">
+            Due Date
+          </label>
+          <p-datepicker
+            [showIcon]="true"
+            formControlName="due_date"
+            inputId="buttondisplay"
+            [showOnFocus]="false"
+          />
+          
+        <div
+            *ngIf="
+               editTaskform.get('due_date')?.touched
+            "
+          >
+            <small
+              class="text-danger"
+              *ngIf="editTaskform.get('due_date')?.errors?.['required']"
+              >Due Date  is Required</small
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+     <p-button label="Submit" type="Submit" />
+  </form>
+</p-dialog>

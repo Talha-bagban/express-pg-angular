@@ -1,0 +1,135 @@
+<div class="container mb-5">
+    <button (click)="back()"> < Back</button><br>
+    <div>
+        <b>Project Title = </b>{{projectByID?.title}}
+    </div>
+      <div>
+        <b>Project description = </b>{{projectByID?.description}}
+    </div>
+     <div>
+        <b>Project Status = </b>{{projectByID?.status}}
+    </div>
+     <div>
+        <b>Project Start-date = </b>{{projectByID?.start_date | date: "dd MMM yyyy, hh:mm a"}}
+    </div>
+     <div>
+        <b>Project End-end = </b>{{projectByID?.end_date | date: "dd MMM yyyy, hh:mm a"}}
+    </div>
+     <div>
+        <b>Project created_by = </b>{{projectByID?.created_by}}
+    </div>
+    <div>
+      <b>Project Bar =</b>
+      <p-progressBar [value]="projectByID?.progress"></p-progressBar>
+    <p>{{ projectByID?.completed_tasks }} / {{ projectByID?.total_tasks }} Tasks Completed</p>
+    </div>
+</div>
+
+<div class="container mb-4">
+    <h3>Task List</h3>
+      <p-table
+    #dt
+    [value]="projectTaskList"
+    [paginator]="true"
+    [rows]="6"
+    [globalFilterFields]="['title', 'description', 'project_name']"
+    responsiveLayout="scroll"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Project Name</th>
+        <th>priority</th>
+        <th>assigned_to</th>
+        <th>Status</th>
+        <th>created_by</th>
+        <th>due_date</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-t>
+      <tr (click)="taskDetail(t)" style="cursor: pointer;">
+        <td>
+          {{ t.title }}
+        </td>
+        <td>{{ t.description }}</td>
+        <td>
+          {{ t.project_name }}
+        </td>
+        <td>
+          {{ t.priority }}
+        </td>
+        <td>
+          {{ t.assigned_employee }}
+        </td>
+        <td>
+          {{ t.status }}
+        </td>
+        <td>
+          {{ t.created_employee }}
+        </td>
+        <td>
+          {{ t.due_date | date: "dd MMM yyyy, hh:mm a"}}
+          <!-- <span *ngIf="isOverdue(t)" class="badge bg-danger rounded-pill"> Overdue </span> -->
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<div class="container mb-4">
+    <h4>Write Comment:-</h4>
+    <form [formGroup]="commentForm" (ngSubmit)="ProjectCommentSubmit()">
+        <div class="row">
+            <div class="col-md-3">
+                 <p-floatlabel>
+                    <textarea
+                        pTextarea
+                        id="comment"
+                        rows="3"
+                        cols="70"
+                        formControlName="comment"
+                        class="h-full"
+                    ></textarea>
+                    <label for="comment">Comment</label>
+                </p-floatlabel>
+            </div>
+        </div>
+         <p-button label="Submit" type="Submit" [disabled]="commentForm.invalid" />
+    </form>
+</div>
+
+<div class="container mb-4">
+    
+<h3>Comments</h3>
+  <div
+    *ngFor="let c of projectCommentList" 
+    class="comment-box border p-2"
+    [ngClass]="{
+      'my-comment': isOwnComment(c.user_id),
+      'other-comment': !isOwnComment(c.user_id)
+    }"
+  >
+
+    <p class="mb-0">{{ c.comment }}</p>
+    <small>
+    <b>ON:-</b> {{ c.created_at | date:'dd MMM yyyy, hh:mm a' }}
+    </small>
+    <b>
+      By:-{{ c.comment_by }}
+    </b>
+
+  </div>
+</div>
+
+
+<div class="container">
+  <h3>Activity History</h3>
+  <div class="mb-3 border p-3" *ngFor="let l of activityLog">
+    <p class="mb-2">{{ l.action_type }}</p>
+    <small> <b>BY:-</b><span class="text-danger"> {{ l.updatedby }} </span></small>
+    <b>{{ l.message }}</b
+    ><br />
+    <b>ON:-</b><span class="text-muted">{{ l.created_at | date: "dd MMM yyyy, hh:mm a" }}</span>
+    </div>
+</div>
